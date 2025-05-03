@@ -7,9 +7,9 @@ def get_minio_client():
         endpoint="minio:9000",
         access_key=MINIO_ACCESS_KEY,
         secret_key=MINIO_SECRET_KEY,
-        secure=False
+        secure=False 
     )
-
+    
     if not client.bucket_exists(MINIO_BUCKET):
         client.make_bucket(MINIO_BUCKET)
         

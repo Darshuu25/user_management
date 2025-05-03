@@ -24,11 +24,9 @@ async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
     file_path = f"profile-pictures/{user_id}/{file.filename}"
     
     try:
-        # Read file content
         file_content = await file.read()
-        # Upload to Minio
         client.put_object(bucket_name="profile-pictures", object_name=file_path, data=file_content, length=len(file_content))
-        pic_url = construct_public_url("profile-pictures", file_path)  # Assumes you have a method to construct the URL
+        pic_url = construct_public_url("profile-pictures", file_path) 
         
         return ProfilePictureResponse(profile_picture_url=pic_url)
     except Exception as e:
@@ -36,6 +34,5 @@ async def upload_profile_picture(user_id: int, file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Upload error: {str(e)}")
 
 def construct_public_url(bucket_name: str, object_name: str) -> str:
-    # This function constructs a URL for accessing the stored file
-    minio_host = "minio:9000"  # Adjust as necessary
+    minio_host = "minio:9000"
     return f"http://{minio_host}/{bucket_name}/{object_name}"

@@ -23,7 +23,7 @@ def mock_minio_client():
 async def test_upload_profile_picture_invalid_file_type(app, mock_minio_client):
     async with AsyncClient(app=app, base_url="http://testserver") as test_client:
         response = await test_client.post(
-            "/upload-profile-picture/1",
+            "/upload-profile-picture/1",  # Ensure the route expects and correctly handles user_id
             files={"file": ("wrongtype.txt", b"Not an image!", "text/plain")}
         )
-        assert response.status_code == 400, "Expected failure: invalid file type"
+        assert response.status_code == 400, "Expected failure on invalid file type"

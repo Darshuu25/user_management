@@ -1,12 +1,11 @@
 from builtins import ValueError, any, bool, str
 from pydantic import BaseModel, EmailStr, Field, validator, root_validator
 from typing import Optional, List
-from datetime import datetime
-from enum import Enum
 import uuid
 import re
 from app.models.user_model import UserRole
 from app.utils.nickname_gen import generate_nickname
+
 
 
 def validate_url(url: Optional[str]) -> Optional[str]:
@@ -16,6 +15,7 @@ def validate_url(url: Optional[str]) -> Optional[str]:
     if not re.match(url_regex, url):
         raise ValueError('Invalid URL format')
     return url
+
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., example="john.doe@example.com")
