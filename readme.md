@@ -1,5 +1,68 @@
 
+# Final‑Project Notes – *User Management*
+**Implemented Feature • User Profile Management**
 
+---
+
+## 1  Key Takeaways and Personal Growth
+During this project I progressed from Docker basics to a full Dev Ops workflow:
+
+* **Containerisation** – multi‑stage Dockerfiles that keep build tools out of the runtime layer.  
+* **Orchestration** – Docker Compose stack (FastAPI + Postgres + MinIO + Nginx) reproducible with one command.  
+* **Automation** – GitHub Actions CI/CD, Buildx multi‑arch builds, Trivy scans on every push.  
+* **Security mindset** – tracking CVEs, upgrading vulnerable libs, hard‑failing on CRITICAL/HIGH issues.  
+* **Object‑storage integration** – MinIO + FastAPI for S3‑compatible PFP uploads.
+
+
+Process‑wise, I adopted a professional Git workflow—feature branches, descriptive commits (25 +), detailed Issues, PR reviews—so every change is traceable from ticket → code → tests → CI run.
+
+---
+
+## 2  Closed QA Issues (5)
+
+| # | Description | URL |
+|---|-------------|-----|
+| 2 | Docker package downgrade blocked build | <https://github.com/Darshuu25/user_management/issues/2> |
+| 3 | Create docker repo “user_api” for Buildx cache | <https://github.com/Darshuu25/user_management/issues/3> |
+| 4 | `ModuleNotFoundError: tenacity` fixed by requirements update | <https://github.com/Darshuu25/user_management/issues/4> |
+| 6 | Docker & MinIO port clash (host 9000 already in use) | <https://github.com/Darshuu25/user_management/issues/6> |
+| 7 | Fixed schema for upload profile pictures | <https://github.com/Darshuu25/user_management/issues/7> |
+
+**Open QA Issue**
+
+* Trivy discovered vulnerabilities – <https://github.com/Darshuu25/user_management/issues/5>
+
+---
+
+## 3  New Test Suite (10 tests)
+
+* Location: `tests/test_storage/`, `tests/test_users/`  
+* Coverage: successful PFP uploads, MIME‑type rejection, oversized files, non‑existent users, MinIO path validation, schema integrity.  
+* CI automatically runs all tests; please the see commits on branch **`minio_feature`**.
+
+---
+
+## 4  New Features Delivered
+
+| Feature | Description |
+|---------|-------------|
+| **PFP Upload Endpoint** | `POST /users/{id}/profile_picture` streams an image to MinIO, stores it under `<user‑id>/<uuid>`, returns a public URL. Enforces JWT auth, MIME whitelist, 5 MB cap. |
+| **PFP URL in User Profile** | Added `profile_picture_url` column via Alembic; every `GET /users/{id}` now returns the stored URL so front‑ends can display PFP without extra calls. |
+
+---
+
+## 5  Docker Hub Image
+
+The image is built and pushed automatically by GitHub Actions:
+
+<https://hub.docker.com/repository/docker/darshuu25/user_api>
+
+
+# Pull & run locally
+```
+docker pull darshuu25/user_api:latest
+docker run --rm -p 8000:8000 darshuu25/user_api:latest
+```
 # The User Management System Final Project: Your Epic Coding Adventure Awaits! 🎉✨🔥
 
 ## Introduction: Buckle Up for the Ride of a Lifetime 🚀🎬
