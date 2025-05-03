@@ -3,10 +3,10 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - minio_feature1
+      - minio_feature
   pull_request:
     branches:
-      - minio_feature1
+      - minio_feature
 
 jobs:
   test:
