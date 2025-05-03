@@ -86,7 +86,7 @@ jobs:
       - name: Scan the Docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/user_management_api:${{ github.sha }}'
+          image-ref: '${{ secrets.DOCKERHUB_USERNAME }}/user_api:${{ github.sha }}'
           format: table
           exit-code: '0'
           ignore-unfixed: true
