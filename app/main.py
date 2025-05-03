@@ -1,11 +1,18 @@
-from builtins import Exception
-from fastapi import FastAPI
+import logging
+from tenacity import retry, stop_after_attempt, wait_fixed
+from fastapi import FastAPI, File, UploadFile
 from starlette.responses import JSONResponse
-from starlette.middleware.cors import CORSMiddleware  # Import the CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from app.database import Database
 from app.dependencies import get_settings
 from app.routers import user_routes
 from app.utils.api_description import getDescription
+from app.utils.minio_utils import get_minio_client
+import uvicorn
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+
 app = FastAPI(
     title="User Management",
     description=getDescription(),
@@ -17,26 +24,42 @@ app = FastAPI(
     },
     license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
 )
-# CORS middleware configuration
-# This middleware will enable CORS and allow requests from any origin
-# It can be configured to allow specific methods, headers, and origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # List of origins that are allowed to access the server, ["*"] allows all
-    allow_credentials=True,  # Support credentials (cookies, authorization headers, etc.)
-    allow_methods=["*"],  # Allowed HTTP methods
-    allow_headers=["*"],  # Allowed HTTP headers
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
+
+
+minioClient = get_minio_client
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
+def connect_to_minio():
+    try:
+        global minioClient
+        minioClient = get_minio_client()
+    except Exception as e:
+        logging.error(f"Failed to connect to MinIO: {e}")
+        raise  
 
 @app.on_event("startup")
 async def startup_event():
-    settings = get_settings()
-    Database.initialize(settings.database_url, settings.debug)
+    try:
+        settings = get_settings()
+        Database.initialize(settings.database_url, settings.debug)
+        connect_to_minio()  # Initialize Minio client and ensure buckets are ready
+    except Exception as e:
+        logging.error(f"Startup failed: {e}")
 
 @app.exception_handler(Exception)
 async def exception_handler(request, exc):
+    logging.error(f"An unexpected error occurred: {exc}")
     return JSONResponse(status_code=500, content={"message": "An unexpected error occurred."})
 
 app.include_router(user_routes.router)
 
-
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8081)  # Change the port number here
